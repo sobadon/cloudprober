@@ -108,7 +108,7 @@ func (c *Client) Notify(ctx context.Context, alertFields map[string]string) erro
 // createTrigerMessage creates a new Slack webhook message, from the alertFields
 func createTrigerMessage(alertFields map[string]string) webhookMessage {
 	return webhookMessage{
-		Text: alertFields["details"] + "\n\nDetails:\n" + alertinfo.FieldsToString(alertFields, "details", "summary"),
+		Text: ":fire:" + alertFields["details"] + "\n",
 	}
 }
 
@@ -144,7 +144,6 @@ func (c *Client) NotifyResolve(ctx context.Context, alertInfo *alertinfo.AlertIn
 
 func createResolvedMessage(alertFields map[string]string) webhookMessage {
 	return webhookMessage{
-		// 暫定的に trigger と同じ文面
-		Text: alertFields["details"] + "\n\nDetails:\n" + alertinfo.FieldsToString(alertFields, "details", "summary"),
+		Text: ":white_check_mark:" + alertFields["details"] + "\n",
 	}
 }
