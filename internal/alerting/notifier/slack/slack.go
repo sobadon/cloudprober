@@ -76,7 +76,7 @@ type webhookMessage struct {
 
 // Notify sends a notification to Slack.
 func (c *Client) Notify(ctx context.Context, alertFields map[string]string) error {
-	message := createMessage(alertFields)
+	message := createTrigerMessage(alertFields)
 
 	jsonBody, err := json.Marshal(message)
 	if err != nil {
@@ -105,9 +105,45 @@ func (c *Client) Notify(ctx context.Context, alertFields map[string]string) erro
 	return nil
 }
 
-// createMessage creates a new Slack webhook message, from the alertFields
-func createMessage(alertFields map[string]string) webhookMessage {
+// createTrigerMessage creates a new Slack webhook message, from the alertFields
+func createTrigerMessage(alertFields map[string]string) webhookMessage {
 	return webhookMessage{
-		Text: alertFields["details"] + "\n\nDetails:\n" + alertinfo.FieldsToString(alertFields, "details", "summary"),
+		Text: ":fire:" + alertFields["details"] + "\n",
+	}
+}
+
+func (c *Client) NotifyResolve(ctx context.Context, alertInfo *alertinfo.AlertInfo, alertFields map[string]string) error {
+	message := createResolvedMessage(alertFields)
+
+	jsonBody, err := json.Marshal(message)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.webhookURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// check status code, return error if not 200
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("slack webhook returned error; statusCode: %d, response: %s", resp.StatusCode, string(b))
+	}
+
+	return nil
+}
+
+func createResolvedMessage(alertFields map[string]string) webhookMessage {
+	return webhookMessage{
+		Text: ":white_check_mark:" + alertFields["details"] + "\n",
 	}
 }

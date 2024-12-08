@@ -149,6 +149,12 @@ func (n *Notifier) NotifyResolve(ctx context.Context, alertInfo *alertinfo.Alert
 			n.l.Errorf("Error closing OpsGenie alert: %v", err)
 		}
 	}
+
+	if n.slackNotifier != nil {
+		if err := n.slackNotifier.NotifyResolve(ctx, alertInfo, fields); err != nil {
+			n.l.Errorf("Error sending Slack resolve message: %v", err)
+		}
+	}
 }
 
 func New(alertcfg *configpb.AlertConf, l *logger.Logger) (*Notifier, error) {

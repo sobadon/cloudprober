@@ -91,7 +91,7 @@ severity: critical`,
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := createMessage(tc.alertFields)
+			got := createTrigerMessage(tc.alertFields)
 			if got != tc.want {
 				t.Errorf("createMessage() = %v, want %v", got, tc.want)
 			}
